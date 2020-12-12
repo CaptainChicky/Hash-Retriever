@@ -16,49 +16,7 @@ echo "Is this correct?"
     `nPress 'Q' to quit.
 	`nPlease type your choice"
     switch($UserInput){
-        RT{
-            Set-ExecutionPolicy Restricted
-            echo "=============================================="
-            echo "Success. The execution policy has been set to:"
-            Get-ExecutionPolicy
-            echo "PowerShell will now close in 30 seconds."
-            timeout 30
-        }
-        AS{
-            Set-ExecutionPolicy AllSigned
-            echo "=============================================="
-            echo "Success. The execution policy has been set to:"
-            Get-ExecutionPolicy
-            echo "PowerShell will now close in 30 seconds."
-            timeout 30
-        }
-        RS{
-            Set-ExecutionPolicy RemoteSigned
-            echo "=============================================="
-            echo "Success. The execution policy has been set to:"
-            Get-ExecutionPolicy
-            echo "PowerShell will now close in 30 seconds."
-            timeout 30
-        }
-        UR{
-            Set-ExecutionPolicy Unrestricted
-            echo "=============================================="
-            echo "Success. The execution policy has been set to:"
-            Get-ExecutionPolicy
-            echo "PowerShell will now close in 30 seconds."
-            timeout 30
-        }
-        BP{
-            Set-ExecutionPolicy Bypass
-            echo "=============================================="
-            echo "Success. The execution policy has been set to:"
-            Get-ExecutionPolicy
-            echo "PowerShell will now close in 30 seconds."
-            timeout 30
-        }
-        Q{
-        echo "You have chosen to exit."
-        timeout 5
-        exit
-        }
+	Function{}
+	fucntion{}
+	etc     {}
     }
