@@ -1,20 +1,8 @@
-
 echo "You have entered..."
 echo $path
 echo "Is this correct?"
 	$UserInput = read-host -Prompt "
     `nY or N?"
-    switch($UserInput){
-
-    }
- 
-
-	$UserInput = read-host -Prompt "
-    `nWelcome to the execution policy modifier.
-	`nEnter one of the specified policies to set the execution policy to your choice:
-	`nRestricted --> 'RT', AllSingned --> 'AS', RemoteSigned --> 'RS', Unrestricted --> 'UR', Bypass --> 'BP'
-    `nPress 'Q' to quit.
-	`nPlease type your choice"
     switch($UserInput){
 	Function{}
 	fucntion{}
