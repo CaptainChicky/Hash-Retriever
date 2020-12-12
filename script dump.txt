@@ -1,0 +1,64 @@
+
+echo "You have entered..."
+echo $path
+echo "Is this correct?"
+	$UserInput = read-host -Prompt "
+    `nY or N?"
+    switch($UserInput){
+
+    }
+ 
+
+	$UserInput = read-host -Prompt "
+    `nWelcome to the execution policy modifier.
+	`nEnter one of the specified policies to set the execution policy to your choice:
+	`nRestricted --> 'RT', AllSingned --> 'AS', RemoteSigned --> 'RS', Unrestricted --> 'UR', Bypass --> 'BP'
+    `nPress 'Q' to quit.
+	`nPlease type your choice"
+    switch($UserInput){
+        RT{
+            Set-ExecutionPolicy Restricted
+            echo "=============================================="
+            echo "Success. The execution policy has been set to:"
+            Get-ExecutionPolicy
+            echo "PowerShell will now close in 30 seconds."
+            timeout 30
+        }
+        AS{
+            Set-ExecutionPolicy AllSigned
+            echo "=============================================="
+            echo "Success. The execution policy has been set to:"
+            Get-ExecutionPolicy
+            echo "PowerShell will now close in 30 seconds."
+            timeout 30
+        }
+        RS{
+            Set-ExecutionPolicy RemoteSigned
+            echo "=============================================="
+            echo "Success. The execution policy has been set to:"
+            Get-ExecutionPolicy
+            echo "PowerShell will now close in 30 seconds."
+            timeout 30
+        }
+        UR{
+            Set-ExecutionPolicy Unrestricted
+            echo "=============================================="
+            echo "Success. The execution policy has been set to:"
+            Get-ExecutionPolicy
+            echo "PowerShell will now close in 30 seconds."
+            timeout 30
+        }
+        BP{
+            Set-ExecutionPolicy Bypass
+            echo "=============================================="
+            echo "Success. The execution policy has been set to:"
+            Get-ExecutionPolicy
+            echo "PowerShell will now close in 30 seconds."
+            timeout 30
+        }
+        Q{
+        echo "You have chosen to exit."
+        timeout 5
+        exit
+        }
+    }
