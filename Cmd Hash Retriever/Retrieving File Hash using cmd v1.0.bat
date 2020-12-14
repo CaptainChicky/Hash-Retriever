@@ -73,7 +73,7 @@ echo ===========================================================================
 echo =======================================================================================
 echo Please wait... retrieving file hash...
 echo.
-certutil -hashfile "%path%" MD2
+certutil -hashfile %path% MD2
 echo.
 echo Done! Thank you for using this script! :D
 pause
@@ -84,7 +84,7 @@ echo ===========================================================================
 echo =======================================================================================
 echo Please wait... retrieving file hash...
 echo.
-certutil -hashfile "%path%" MD4
+certutil -hashfile %path% MD4
 echo.
 echo Done! Thank you for using this script! :D
 pause
@@ -95,7 +95,7 @@ echo ===========================================================================
 echo =======================================================================================
 echo Please wait... retrieving file hash...
 echo.
-certutil -hashfile "%path%" MD5
+certutil -hashfile %path% MD5
 echo.
 echo Done! Thank you for using this script! :D
 pause
@@ -106,7 +106,7 @@ echo ===========================================================================
 echo =======================================================================================
 echo Please wait... retrieving file hash...
 echo.
-certutil -hashfile "%path%" SHA1
+certutil -hashfile %path% SHA1
 echo.
 echo Done! Thank you for using this script! :D
 pause
@@ -117,7 +117,7 @@ echo ===========================================================================
 echo =======================================================================================
 echo Please wait... retrieving file hash...
 echo.
-certutil -hashfile "%path%" SHA256
+certutil -hashfile %path% SHA256
 echo.
 echo Done! Thank you for using this script! :D
 pause
@@ -128,7 +128,7 @@ echo ===========================================================================
 echo =======================================================================================
 echo Please wait... retrieving file hash...
 echo.
-certutil -hashfile "%path%" SHA384
+certutil -hashfile %path% SHA384
 echo.
 echo Done! Thank you for using this script! :D
 pause
@@ -139,7 +139,7 @@ echo ===========================================================================
 echo =======================================================================================
 echo Please wait... retrieving file hash...
 echo.
-certutil -hashfile "%path%" SHA512
+certutil -hashfile %path% SHA512
 echo.
 echo Done! Thank you for using this script! :D
 pause
