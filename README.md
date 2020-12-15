@@ -11,4 +11,4 @@ This repository contains two folders:
 *Note*: The batch script can detect when you make the wrong hash algorithm choice, but the PowerShell script cannot. However, both the PowerShell scripts and the batch script cannot make sure that the file path is correct, so therefore, I have included a second verification step that allows the user to retype to file path, assuming the first time they made a mistake.
 
 # Requirements to use...
-PowerShell(no duh), and since there is still a little bit of MS-DOS batch programming, Windows Command Prompt(cmd.exe) is a optional feature to include.
+PowerShell(no duh), and since there is also MS-DOS batch programming, Windows Command Prompt(cmd.exe) is also required.
