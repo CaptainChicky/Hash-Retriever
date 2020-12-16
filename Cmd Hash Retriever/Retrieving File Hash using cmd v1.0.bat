@@ -38,7 +38,7 @@ if /i "%choice%" == "Y" (
 echo.
 echo =======================================================================================
 echo =======================================================================================
-echo Now, please choose the algorithm you want to get the has from...
+echo Now, please choose the algorithm you want to get the hash from...
 echo 1^) MD2
 echo 2^) MD4
 echo 3^) MD5
