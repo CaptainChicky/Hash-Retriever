@@ -10,7 +10,7 @@ echo Made by Captain Chicky 2020.
 echo =======================================================================================
 echo =======================================================================================
 echo Welcome to the hash retriever!
-echo This script is a utility script written for the user to have an easier time checking hashes with PowerShell.
+echo This script is a utility script written for the user to have an easier time checking hashes with the Command Prompt.
 echo To begin, please type in the file path of the file you want the hash of...
 goto Path
 
