@@ -11,4 +11,4 @@ This repository contains two folders:
 2) Batchfile Hash Retriever, which contains a single batch script imitating the v2.1 PowerShell script. Note that since the command prompt doesn't have any built in hash finding command, only certutil can be used, and thus lacks a couple of options, namely, MACTripleDES and RIPEMD160. I've also revisited this in 2023 with a v2.0 that doesn't use goto (which disrupts code flow), and formats everything nicely with good batchfile coding habits.
 
 # Dependencies
-The PowerShell scripts, to be safe, should run on PowerShell 5.1 or higher, which should have native cmdlets that can hash. Both it and the batchfile script should be able to access certutil.exe, which should come installed with Windows in the system32 folder.
+The PowerShell scripts, to be safe, should run on PowerShell 5.1 or higher, which should have native cmdlets that can hash. Both it and the batchfile script should be able to access certutil.exe, which should come installed with Windows in the system32 folder, along with the command prompt.
