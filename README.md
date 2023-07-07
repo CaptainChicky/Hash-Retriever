@@ -1,4 +1,4 @@
-# What is the Hash Retriever?
+# What is this?
 This is a collection of scripts aimed towards helping a user find a file's hash. I wrote this after I found myself in need of finding file hashes of virtual disk image files for installing windows I've torrented from archive.org and a few Linux ISOs. I didn't feel like remembering the commands of PowerShell to find the hashes, so I made this where one would only need to type in the file path, and identify the algorithm used to find the hash.
 
 I've revisited this in 2023 and updated the batchfile script and powershell scripts with better code and better coding habits lol.
