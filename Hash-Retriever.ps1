@@ -111,7 +111,7 @@ Clear-Host
 Write-Host ""
 Write-Host "  =====================================================================" -ForegroundColor Cyan
 Write-Host "  |                          HASH RETRIEVER                           |" -ForegroundColor Cyan
-Write-Host "  |                    Made by Captain Chicky 2026                    |" -ForegroundColor Cyan
+Write-Host "  |                      Made by Captain Chicky                       |" -ForegroundColor Cyan
 Write-Host "  =====================================================================" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "     This utility helps you compute cryptographic hashes of files." -ForegroundColor Gray

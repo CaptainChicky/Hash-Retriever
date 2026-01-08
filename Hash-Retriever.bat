@@ -6,7 +6,7 @@ mode con: cols=150 lines=35
 
 :: Initial display
 cls
-echo Made by Captain Chicky 2026
+echo Made by Captain Chicky
 echo ===============================================================================
 echo Welcome to the Hash Retriever!
 echo This script supports CertUtil and PowerShell .NET hash algorithms.
