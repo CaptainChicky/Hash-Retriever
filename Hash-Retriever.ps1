@@ -1,4 +1,30 @@
-$Host.UI.RawUI.WindowSize = New-Object Management.Automation.Host.Size(150, 40)
+# Set bigger font
+Add-Type -TypeDefinition @"
+using System;
+using System.Runtime.InteropServices;
+public class ConsoleFont {
+    [DllImport("kernel32.dll")] public static extern IntPtr GetStdHandle(int h);
+    [DllImport("kernel32.dll")] public static extern bool SetCurrentConsoleFontEx(IntPtr h, bool m, ref CONSOLE_FONT_INFOEX f);
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    public struct CONSOLE_FONT_INFOEX {
+        public uint cbSize; public uint nFont; public short dwFontSizeX; public short dwFontSizeY;
+        public int FontFamily; public int FontWeight;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)] public string FaceName;
+    }
+}
+"@
+
+$h = [ConsoleFont]::GetStdHandle(-11)
+$f = New-Object ConsoleFont+CONSOLE_FONT_INFOEX
+$f.cbSize = [System.Runtime.InteropServices.Marshal]::SizeOf($f)
+$f.dwFontSizeY = 20  # CHANGE THIS NUMBER (bigger = larger text)
+$f.FaceName = "Consolas"
+$f.FontFamily = 54
+$f.FontWeight = 400
+[ConsoleFont]::SetCurrentConsoleFontEx($h, $false, [ref]$f) | Out-Null
+
+# Rest of your script...
+mode con: cols=150 lines=30
 $Host.UI.RawUI.BackgroundColor = "Black"
 $Host.UI.RawUI.ForegroundColor = "Cyan"
 Clear-Host
@@ -14,12 +40,12 @@ function Write-Header {
 
 function Write-Success {
     param([string]$Message)
-    Write-Host "✓ $Message" -ForegroundColor Green
+    Write-Host "[SUCCESS] $Message" -ForegroundColor Green
 }
 
 function Write-Error {
     param([string]$Message)
-    Write-Host "✗ ERROR: $Message" -ForegroundColor Red
+    Write-Host "[ERROR] $Message" -ForegroundColor Red
 }
 
 function Get-MACKey {
@@ -83,218 +109,251 @@ function Get-MACKey {
 # Introduction
 Clear-Host
 Write-Host ""
-Write-Host "  ╔═══════════════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
-Write-Host "  ║                    HASH RETRIEVER v2.0                            ║" -ForegroundColor Cyan
-Write-Host "  ║                 Made by Captain Chicky 2026                       ║" -ForegroundColor Cyan
-Write-Host "  ╚═══════════════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
+Write-Host "  =====================================================================" -ForegroundColor Cyan
+Write-Host "  |                          HASH RETRIEVER                           |" -ForegroundColor Cyan
+Write-Host "  |                    Made by Captain Chicky 2026                    |" -ForegroundColor Cyan
+Write-Host "  =====================================================================" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "  This utility helps you compute cryptographic hashes of files." -ForegroundColor Gray
-Write-Host "  Supports: MD2, MD4, MD5, SHA1, SHA256, SHA384, SHA512," -ForegroundColor Gray
-Write-Host "            RIPEMD160, and MACTripleDES" -ForegroundColor Gray
+Write-Host "     This utility helps you compute cryptographic hashes of files." -ForegroundColor Gray
+Write-Host "       Supports: MD2, MD4, MD5, SHA1, SHA256, SHA384, SHA512," -ForegroundColor Gray
+Write-Host "                   RIPEMD160, and MACTripleDES" -ForegroundColor Gray
 Write-Host ""
 
-# Get File Path
+# Main computation loop
 do {
-    $path = Read-Host "  Enter file path"
+    # Reset variables for new computation
+    $path = $null
+    $algorithm = $null
+    $macKey = $null
     
-    if ([string]::IsNullOrWhiteSpace($path)) {
-        Write-Error "File path cannot be empty."
-        Write-Host ""
-        continue
-    }
-    
-    # Remove quotes if present
-    $path = $path.Trim('"')
-    
-    Write-Host ""
-    Write-Host "  You have entered: " -NoNewline -ForegroundColor Gray
-    Write-Host $path -ForegroundColor Yellow
-    Write-Host ""
-    
-    $confirm = Read-Host "  Is this correct? (Y/N)"
-    
-    if ($confirm -eq "N" -or $confirm -eq "n") {
-        Write-Host ""
-        Write-Host "  Please retype the file path..." -ForegroundColor Yellow
-        Write-Host ""
-        continue
-    }
-    elseif ($confirm -eq "Y" -or $confirm -eq "y") {
-        if (-not (Test-Path -Path $path -PathType Leaf)) {
-            Write-Host ""
-            Write-Error "File does not exist. Please try again."
+    # Get File Path
+    do {
+        $path = Read-Host "  Enter file path"
+        
+        if ([string]::IsNullOrWhiteSpace($path)) {
+            Write-Error "File path cannot be empty."
             Write-Host ""
             continue
         }
+        
+        # Remove quotes if present
+        $path = $path.Trim('"')
+        
+        Write-Host ""
+        Write-Host "  You have entered: " -NoNewline -ForegroundColor Gray
+        Write-Host $path -ForegroundColor Yellow
+        Write-Host ""
+        
+        $confirm = Read-Host "  Is this correct? (Y/N)"
+        
+        if ($confirm -eq "N" -or $confirm -eq "n") {
+            Write-Host ""
+            Write-Host "  Please retype the file path..." -ForegroundColor Yellow
+            Write-Host ""
+            continue
+        }
+        elseif ($confirm -eq "Y" -or $confirm -eq "y") {
+            if (-not (Test-Path -Path $path -PathType Leaf)) {
+                Write-Host ""
+                Write-Error "File does not exist. Please try again."
+                Write-Host ""
+                continue
+            }
+            else {
+                Write-Success "File found!"
+                break
+            }
+        }
         else {
-            Write-Success "File found!"
+            Write-Host ""
+            Write-Error "Invalid choice. Please enter Y or N."
+            Write-Host ""
+        }
+
+    } while ($true)
+
+    # Get Algorithm
+    Write-Header "Select Hash Algorithm"
+
+    Write-Host "  +-----------------------------------------------------------------+" -ForegroundColor Cyan
+    Write-Host "  |  [1] MD2        [2] MD4        [3] MD5                          |" -ForegroundColor White
+    Write-Host "  |  [4] SHA1       [5] SHA256     [6] SHA384                       |" -ForegroundColor White
+    Write-Host "  |  [7] SHA512     [8] RIPEMD160  [9] MACTripleDES (requires key)  |" -ForegroundColor White
+    Write-Host "  +-----------------------------------------------------------------+" -ForegroundColor Cyan
+    Write-Host ""
+
+    while ($true) {
+        $choice = Read-Host "  Enter number (1-9)"
+        
+        $algorithm = switch ($choice) {
+            "1" { "MD2"; break }
+            "2" { "MD4"; break }
+            "3" { "MD5"; break }
+            "4" { "SHA1"; break }
+            "5" { "SHA256"; break }
+            "6" { "SHA384"; break }
+            "7" { "SHA512"; break }
+            "8" { "RIPEMD160"; break }
+            "9" { "MACTripleDES"; break }
+            default { 
+                Write-Host ""
+                Write-Error "Invalid choice. Please enter a number between 1 and 9."
+                Write-Host ""
+                $null
+            }
+        }
+        
+        if ($null -ne $algorithm) {
+            Write-Success "Algorithm selected: $algorithm"
+            
+            # Get MAC key if MACTripleDES is selected
+            if ($algorithm -eq "MACTripleDES") {
+                $macKey = Get-MACKey
+            }
+            
             break
         }
     }
-    else {
-        Write-Host ""
-        Write-Error "Invalid choice. Please enter Y or N."
-        Write-Host ""
+
+    # Compute Hash
+    Write-Header "Computing Hash"
+
+    Write-Host "  Algorithm: " -NoNewline -ForegroundColor Gray
+    Write-Host $algorithm -ForegroundColor Yellow
+    Write-Host "  File: " -NoNewline -ForegroundColor Gray
+    Write-Host $path -ForegroundColor Yellow
+    if ($algorithm -eq "MACTripleDES") {
+        Write-Host "  Key: " -NoNewline -ForegroundColor Gray
+        Write-Host $macKey -ForegroundColor Yellow
     }
+    Write-Host ""
+    Write-Host "  Please wait... computing hash..." -ForegroundColor Gray
+    Write-Host ""
 
-} while ($true)
-
-# Get Algorithm
-Write-Header "Select Hash Algorithm"
-
-Write-Host "  ┌─────────────────────────────────────────────────────────────────┐" -ForegroundColor Cyan
-Write-Host "  │  [1] MD2        [2] MD4        [3] MD5                          │" -ForegroundColor White
-Write-Host "  │  [4] SHA1       [5] SHA256     [6] SHA384                       │" -ForegroundColor White
-Write-Host "  │  [7] SHA512     [8] RIPEMD160  [9] MACTripleDES (requires key)  │" -ForegroundColor White
-Write-Host "  └─────────────────────────────────────────────────────────────────┘" -ForegroundColor Cyan
-Write-Host ""
-
-$macKey = $null
-
-while ($true) {
-    $choice = Read-Host "  Enter number (1-9)"
-    
-    $algorithm = switch ($choice) {
-        "1" { "MD2"; break }
-        "2" { "MD4"; break }
-        "3" { "MD5"; break }
-        "4" { "SHA1"; break }
-        "5" { "SHA256"; break }
-        "6" { "SHA384"; break }
-        "7" { "SHA512"; break }
-        "8" { "RIPEMD160"; break }
-        "9" { "MACTripleDES"; break }
-        default { 
-            Write-Host ""
-            Write-Error "Invalid choice. Please enter a number between 1 and 9."
-            Write-Host ""
-            $null
-        }
-    }
-    
-    if ($null -ne $algorithm) {
-        Write-Success "Algorithm selected: $algorithm"
-        
-        # Get MAC key if MACTripleDES is selected
-        if ($algorithm -eq "MACTripleDES") {
-            $macKey = Get-MACKey
-        }
-        
-        break
-    }
-}
-
-# Compute Hash
-Write-Header "Computing Hash"
-
-Write-Host "  Algorithm: " -NoNewline -ForegroundColor Gray
-Write-Host $algorithm -ForegroundColor Yellow
-Write-Host "  File: " -NoNewline -ForegroundColor Gray
-Write-Host $path -ForegroundColor Yellow
-if ($algorithm -eq "MACTripleDES") {
-    Write-Host "  Key: " -NoNewline -ForegroundColor Gray
-    Write-Host $macKey -ForegroundColor Yellow
-}
-Write-Host ""
-Write-Host "  Please wait... computing hash..." -ForegroundColor Gray
-Write-Host ""
-
-try {
-    if ($algorithm -eq "MD4" -or $algorithm -eq "MD2") {
-        # Use CertUtil for MD4 and MD2
-        $result = certutil -hashfile "$path" $algorithm 2>&1
-        
-        if ($LASTEXITCODE -eq 0) {
-            Write-Host "  ─────────────────────────────────────────────────────────" -ForegroundColor Cyan
-            Write-Host ""
-            $result | ForEach-Object {
-                if ($_ -match '^[a-fA-F0-9\s]+$' -and $_.Trim().Length -gt 10) {
-                    Write-Host "  Hash: " -NoNewline -ForegroundColor Green
-                    Write-Host $_.Trim() -ForegroundColor White
+    try {
+        if ($algorithm -eq "MD4" -or $algorithm -eq "MD2") {
+            # Use CertUtil for MD4 and MD2
+            $result = certutil -hashfile "$path" $algorithm 2>&1
+            
+            if ($LASTEXITCODE -eq 0) {
+                Write-Host "  -----------------------------------------------------------" -ForegroundColor Cyan
+                Write-Host ""
+                $result | ForEach-Object {
+                    if ($_ -match '^[a-fA-F0-9\s]+$' -and $_.Trim().Length -gt 10) {
+                        Write-Host "  Hash: " -NoNewline -ForegroundColor Green
+                        Write-Host $_.Trim() -ForegroundColor White
+                    }
                 }
+                Write-Host ""
+                Write-Host "  -----------------------------------------------------------" -ForegroundColor Cyan
+            } else {
+                Write-Error "Failed to compute hash with CertUtil."
             }
+        }
+        elseif ($algorithm -eq "MACTripleDES") {
+            # Use .NET for MACTripleDES
+            $keyBytes = New-Object byte[] ($macKey.Length / 2)
+            for ($i = 0; $i -lt $macKey.Length; $i += 2) {
+                $keyBytes[$i / 2] = [Convert]::ToByte($macKey.Substring($i, 2), 16)
+            }
+            
+            $stream = [System.IO.File]::OpenRead($path)
+            $mac = New-Object System.Security.Cryptography.MACTripleDES
+            $mac.Key = $keyBytes
+            $hashBytes = $mac.ComputeHash($stream)
+            $stream.Close()
+            $mac.Dispose()
+            
+            $hashString = [System.BitConverter]::ToString($hashBytes) -replace '-',''
+            
+            Write-Host "  -----------------------------------------------------------" -ForegroundColor Cyan
             Write-Host ""
-            Write-Host "  ─────────────────────────────────────────────────────────" -ForegroundColor Cyan
-        } else {
-            Write-Error "Failed to compute hash with CertUtil."
+            Write-Host "  Algorithm : " -NoNewline -ForegroundColor Gray
+            Write-Host "MACTripleDES" -ForegroundColor White
+            Write-Host "  MAC       : " -NoNewline -ForegroundColor Green
+            Write-Host $hashString -ForegroundColor White
+            Write-Host "  Key       : " -NoNewline -ForegroundColor Gray
+            Write-Host $macKey -ForegroundColor White
+            Write-Host "  Path      : " -NoNewline -ForegroundColor Gray
+            Write-Host $path -ForegroundColor White
+            Write-Host ""
+            Write-Host "  -----------------------------------------------------------" -ForegroundColor Cyan
+        }
+        elseif ($algorithm -eq "RIPEMD160") {
+            # Use .NET for RIPEMD160
+            $stream = [System.IO.File]::OpenRead($path)
+            $hasher = [System.Security.Cryptography.RIPEMD160]::Create()
+            $hashBytes = $hasher.ComputeHash($stream)
+            $stream.Close()
+            
+            $hashString = [System.BitConverter]::ToString($hashBytes) -replace '-',''
+            
+            Write-Host "  -----------------------------------------------------------" -ForegroundColor Cyan
+            Write-Host ""
+            Write-Host "  Algorithm : " -NoNewline -ForegroundColor Gray
+            Write-Host "RIPEMD160" -ForegroundColor White
+            Write-Host "  Hash      : " -NoNewline -ForegroundColor Green
+            Write-Host $hashString -ForegroundColor White
+            Write-Host "  Path      : " -NoNewline -ForegroundColor Gray
+            Write-Host $path -ForegroundColor White
+            Write-Host ""
+            Write-Host "  -----------------------------------------------------------" -ForegroundColor Cyan
+        }
+        else {
+            # Use Get-FileHash for SHA1, SHA256, SHA384, SHA512, MD5
+            $hash = Get-FileHash -Path $path -Algorithm $algorithm -ErrorAction Stop
+            
+            Write-Host "  -----------------------------------------------------------" -ForegroundColor Cyan
+            Write-Host ""
+            Write-Host "  Algorithm : " -NoNewline -ForegroundColor Gray
+            Write-Host $hash.Algorithm -ForegroundColor White
+            Write-Host "  Hash      : " -NoNewline -ForegroundColor Green
+            Write-Host $hash.Hash -ForegroundColor White
+            Write-Host "  Path      : " -NoNewline -ForegroundColor Gray
+            Write-Host $hash.Path -ForegroundColor White
+            Write-Host ""
+            Write-Host "  -----------------------------------------------------------" -ForegroundColor Cyan
+        }
+        
+        Write-Host ""
+        Write-Success "Hash computation complete!"
+        
+    } catch {
+        Write-Host ""
+        Write-Error "Failed to compute hash: $($_.Exception.Message)"
+    }
+
+    # Ask if user wants to compute another hash
+    Write-Host ""
+    Write-Host "===============================================================================" -ForegroundColor Cyan
+    Write-Host ""
+    
+    while ($true) {
+        $continueChoice = Read-Host "  Compute another hash? (Y/N)"
+        
+        if ($continueChoice -eq "Y" -or $continueChoice -eq "y") {
+            Write-Host ""
+            Write-Host "  Starting new computation..." -ForegroundColor Yellow
+            Write-Host ""
+            Write-Host "===============================================================================" -ForegroundColor Cyan
+            Write-Host ""
+            $continue = $true
+            break
+        }
+        elseif ($continueChoice -eq "N" -or $continueChoice -eq "n") {
+            $continue = $false
+            break
+        }
+        else {
+            Write-Host ""
+            Write-Error "Invalid choice. Please enter Y or N."
+            Write-Host ""
         }
     }
-    elseif ($algorithm -eq "MACTripleDES") {
-        # Use .NET for MACTripleDES
-        $keyBytes = New-Object byte[] ($macKey.Length / 2)
-        for ($i = 0; $i -lt $macKey.Length; $i += 2) {
-            $keyBytes[$i / 2] = [Convert]::ToByte($macKey.Substring($i, 2), 16)
-        }
-        
-        $stream = [System.IO.File]::OpenRead($path)
-        $mac = New-Object System.Security.Cryptography.MACTripleDES
-        $mac.Key = $keyBytes
-        $hashBytes = $mac.ComputeHash($stream)
-        $stream.Close()
-        $mac.Dispose()
-        
-        $hashString = [System.BitConverter]::ToString($hashBytes) -replace '-',''
-        
-        Write-Host "  ─────────────────────────────────────────────────────────" -ForegroundColor Cyan
-        Write-Host ""
-        Write-Host "  Algorithm : " -NoNewline -ForegroundColor Gray
-        Write-Host "MACTripleDES" -ForegroundColor White
-        Write-Host "  MAC       : " -NoNewline -ForegroundColor Green
-        Write-Host $hashString -ForegroundColor White
-        Write-Host "  Key       : " -NoNewline -ForegroundColor Gray
-        Write-Host $macKey -ForegroundColor White
-        Write-Host "  Path      : " -NoNewline -ForegroundColor Gray
-        Write-Host $path -ForegroundColor White
-        Write-Host ""
-        Write-Host "  ─────────────────────────────────────────────────────────" -ForegroundColor Cyan
-    }
-    elseif ($algorithm -eq "RIPEMD160") {
-        # Use .NET for RIPEMD160
-        $stream = [System.IO.File]::OpenRead($path)
-        $hasher = [System.Security.Cryptography.RIPEMD160]::Create()
-        $hashBytes = $hasher.ComputeHash($stream)
-        $stream.Close()
-        
-        $hashString = [System.BitConverter]::ToString($hashBytes) -replace '-',''
-        
-        Write-Host "  ─────────────────────────────────────────────────────────" -ForegroundColor Cyan
-        Write-Host ""
-        Write-Host "  Algorithm : " -NoNewline -ForegroundColor Gray
-        Write-Host "RIPEMD160" -ForegroundColor White
-        Write-Host "  Hash      : " -NoNewline -ForegroundColor Green
-        Write-Host $hashString -ForegroundColor White
-        Write-Host "  Path      : " -NoNewline -ForegroundColor Gray
-        Write-Host $path -ForegroundColor White
-        Write-Host ""
-        Write-Host "  ─────────────────────────────────────────────────────────" -ForegroundColor Cyan
-    }
-    else {
-        # Use Get-FileHash for SHA1, SHA256, SHA384, SHA512, MD5
-        $hash = Get-FileHash -Path $path -Algorithm $algorithm -ErrorAction Stop
-        
-        Write-Host "  ─────────────────────────────────────────────────────────" -ForegroundColor Cyan
-        Write-Host ""
-        Write-Host "  Algorithm : " -NoNewline -ForegroundColor Gray
-        Write-Host $hash.Algorithm -ForegroundColor White
-        Write-Host "  Hash      : " -NoNewline -ForegroundColor Green
-        Write-Host $hash.Hash -ForegroundColor White
-        Write-Host "  Path      : " -NoNewline -ForegroundColor Gray
-        Write-Host $hash.Path -ForegroundColor White
-        Write-Host ""
-        Write-Host "  ─────────────────────────────────────────────────────────" -ForegroundColor Cyan
-    }
     
-    Write-Host ""
-    Write-Success "Hash computation complete!"
-    
-} catch {
-    Write-Host ""
-    Write-Error "Failed to compute hash: $($_.Exception.Message)"
-}
+} while ($continue)
 
 # Footer
-Write-Host ""
-Write-Host "===============================================================================" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  Done! Thank you for using this script :D" -ForegroundColor Green
 Write-Host ""
